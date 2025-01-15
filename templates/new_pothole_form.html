@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+
+    <style>
+        #map {
+            height: 180px;
+            width: 400px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>மேடுபள்ளம்</h1>
+    <form id="report_form" enctype="multipart/form-data" method="POST">
+
+
+        <textarea id="pothole_desc" placeholder="Pothole description"></textarea>
+        <br>
+        <textarea id="loc_data" placeholder="Enter the location detail(Area,Landmark)"></textarea>
+        <br>
+        <small>Mark on map:</small>
+        <div id="map"></div>
+        <input type="text" id="lat" disabled>
+        <input type="text" id="lng" disabled>
+        <button type="submit" id="submit_btn">Submit</button>
+
+    </form>
+    <script>
+        // Function to clear all input fields
+
+
+        window.onload = function () {
+            clearAllInputs(); // This will clear inputs on page load
+        };
+        function clearAllInputs() {
+            // Select all input elements (text, checkbox, radio, etc.)
+            const inputs = document.querySelectorAll('input, textarea, select');
+
+            // Loop through each input element and reset its value
+            inputs.forEach(function (input) {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    // For checkbox or radio, uncheck them
+                    input.checked = false;
+                } else {
+                    // For text fields, textareas, or select options, clear their values
+                    input.value = '';
+                }
+            });
+        }
+
+
+
+
+
+
+        var map = L.map('map').setView([12.9749, 80.1328], 12);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Add a marker variable (initially null)
+        var marker = null;
+
+        // Listen for map clicks
+        map.on('click', function (e) {
+            var lat = e.latlng.lat; // Latitude
+            var lng = e.latlng.lng; // Longitude
+
+            // Update or create a marker at the clicked location
+            if (marker) {
+                marker.setLatLng(e.latlng); // Move the marker to the new location
+            } else {
+                marker = L.marker(e.latlng).addTo(map); // Add a new marker
+            }
+
+            // Display the selected coordinates
+            document.getElementById('lat').value = `${lat.toFixed(5)}`
+            document.getElementById('lng').value = `${lng.toFixed(5)}`;
+        });
+        document.getElementById("submit_btn").addEventListener("click", async (event) => {
+            event.preventDefault();
+            var formData = new FormData();
+
+            // Get the values of the inputs
+            var loc_data = document.getElementById('loc_data').value;
+            var pothole_desc = document.getElementById('pothole_desc').value;
+            var image_upload = document.getElementById('image_upload').files[0];
+            var lat = document.getElementById('lat').value;
+            var lng = document.getElementById('lng').value;
+
+
+            // Append the form data to FormData object
+            formData.append('location', loc_data);
+            formData.append('pothole_desc', pothole_desc);
+            formData.append('image_upload', image_upload);
+            formData.append('latitude', lat);
+            formData.append('longitude', lng);
+
+
+
+
+            try {
+                const response = await fetch("/add_pothole", {
+                    method: "POST",
+
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                document.getElementById('report_form').reset();
+
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        });
+
+
+        //image gps extraction
+        function updateMarkerPosition() {
+            var lat = document.getElementById('lat').value;
+            var lng = document.getElementById('lng').value;
+
+            // Ensure that both latitude and longitude are valid numbers before updating the marker
+            if (!isNaN(lat) && !isNaN(lng)) {
+
+                var latlng = L.latLng(lat, lng);
+                map.setView([lat, lng], 15);
+                if (marker) {
+                    marker.setLatLng(latlng); // Move the marker to the new location
+                } else {
+                    marker = L.marker(latlng).addTo(map); // Add a new marker
+                }
+
+            }
+        }
+
+
+
+
+        function extractGPS() {
+            const fileInput = document.getElementById('image_upload');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    EXIF.getData(img, function () {
+                        const latitude = EXIF.getTag(img, "GPSLatitude");
+                        const longitude = EXIF.getTag(img, "GPSLongitude");
+
+                        if (latitude && longitude) {
+                            const lat = convertToDecimal(latitude);
+                            const lng = convertToDecimal(longitude);
+                            document.getElementById('lat').value = `${lat.toFixed(5)}`
+                            document.getElementById('lng').value = `${lng.toFixed(5)}`;
+                            updateMarkerPosition()
+
+
+                        } else {
+                            console.log("No GPS data found in the image.");
+                        }
+                    });
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function convertToDecimal(coordinate) {
+            const degrees = coordinate[0];
+            const minutes = coordinate[1];
+            const seconds = coordinate[2];
+
+            return degrees + (minutes / 60) + (seconds / 3600);
+        }
+
+        document.getElementById('image_upload').addEventListener('change', extractGPS);
+
+
+        //
+
+
+    </script>
+
+</body>
+
+</html>

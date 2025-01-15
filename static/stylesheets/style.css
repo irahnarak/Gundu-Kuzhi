@@ -1,6 +1,6 @@
 body {
     display: flex;
-    gap: 5%;
+    gap: 1%;
     flex-direction: column;
     /* Center horizontally */
     align-items: center;

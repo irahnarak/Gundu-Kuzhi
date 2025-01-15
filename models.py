@@ -13,6 +13,9 @@ class Pothole(db.Model):
         db.String(60), nullable=False
     )  # Corresponds to varchar(60)
     location = db.Column(db.String(100), nullable=False)
+    taluk = db.Column(db.String(30), nullable=False)
+    district = db.Column(db.String(30), nullable=False)
+
     latitude = db.Column(
         db.Numeric(9, 5), nullable=False
     )  # Corresponds to decimal(9,5)
@@ -20,5 +23,13 @@ class Pothole(db.Model):
         db.Numeric(9, 5), nullable=False
     )  # Corresponds to decimal(9,5)
 
-    def __repr__(self):
-        return f"<Pothole {self.id}>"
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "pothole_desc": self.location,
+            "location": self.location,
+            "taluk": self.taluk,
+            "district": self.district,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+        }

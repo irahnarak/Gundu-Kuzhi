@@ -14,9 +14,12 @@ def home():
 
 
 def home_data():
-    return render_template("home.html")
-    # potholes = db.session.query(Pothole).filter(Pothole.location == place).all()
-    # print(potholes)
+    potholes = db.session.query(Pothole).all()
+    print(potholes)
+    potholes_list = [pothole.to_dict() for pothole in potholes]
+
+    # Return as JSON response (if using Flask)
+    return jsonify(potholes_list)
 
 
 def new_pothole_form():
@@ -42,15 +45,15 @@ def p_save():
             id="p" + str(uuid.uuid4()),
             pothole_desc=pothole_data["pothole_desc"],
             location=pothole_data["location"],
+            taluk=pothole_data["p_taluk"],
+            district=pothole_data["p_district"],
             latitude=pothole_data["latitude"],
             longitude=pothole_data["longitude"],
         )
 
-        # Add the new record to the session
-        # db.session.add(new_pothole)
+        db.session.add(new_pothole)
 
-        # Commit the transaction to the database
-        # db.session.commit()
+        db.session.commit()
 
         return jsonify(
             {"success": True, "message": "Pothole record added successfully!"}

@@ -1,12 +1,17 @@
 
 window.onload = function () {
+    clearData();
+    datas = getData();
+
+};
+function clearData() {
     document.getElementById("lat").value = "";
     document.getElementById("lng").value = ""
     document.getElementById("p_desc").value = ""
     document.getElementById("p_location").value = ""
     document.getElementById("p_taluk").value = ""
     document.getElementById("p_district").value = ""
-};
+}
 
 
 
@@ -14,8 +19,10 @@ window.onload = function () {
 function add_event() {
     lat = document.getElementById("lat").value;
     lng = document.getElementById("lng").value;
+    let p_taluk = document.getElementById("p_taluk").value;
+    let p_district = document.getElementById("p_district").value;
 
-    if (lat != "" && lng != "") {
+    if (lat != "" && lng != "" && p_taluk != "" && p_district != "") {
         let modal = document.getElementById("add-pothole-model");
 
         modal.style.display = "block";
@@ -39,9 +46,8 @@ function add_event() {
             }
         }
 
-        // Handle form submission (optional)
         modalForm.onsubmit = function (event) {
-            event.preventDefault(); // Prevent form from refreshing page
+            event.preventDefault();
 
             // Capture input values (just as an example)
             let input1Value = document.getElementById("p_desc").value;
@@ -50,21 +56,12 @@ function add_event() {
             let input4Value = document.getElementById("p_district").value;
 
 
-
-            // For demonstration purposes, log the values to the console
-            console.log("Input 1:", input1Value);
-            console.log("Input 2:", input2Value);
-            console.log("Input 3:", input3Value);
-            console.log("Input 4:", input4Value);
-
-
-            // Optionally close the modal after submission
             modal.style.display = "none";
         }
 
     }
     else {
-        alert("Please mark the pothole location.")
+        alert("Please mark the pothole location (TN)")
     }
 
 
@@ -72,67 +69,93 @@ function add_event() {
 }
 
 
-var map = L.map('map').setView([12.9749, 80.1328], 15);
+var map = L.map('map').setView([12.9749, 80.1328], 12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
+
 // Add a marker variable (initially null)
-var markers = [
-    { lat: 12.99708, lng: 80.10700, title: "Marker 1" },
-    { lat: 12.97515, lng: 80.13329, title: "Marker 2" },
-    { lat: 12.99253, lng: 80.10953, title: "Marker 3" }
-];
 
-// Step 4: Iterate through the markers array and add markers to the map
-markers.forEach(function (markerData) {
-    var roundIcon = L.divIcon({
-        className: 'round-marker',  // Use the class defined in CSS for custom style
-        iconSize: [15, 15],  // Set the size of the round marker
+function getData() {
+    var markers = null;
+    fetch('/home_data')
+        .then(response => {
+            // Check if the request was successful (status code 200-299)
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // Parse the response body as JSON
+            return response.json();
+        })
+        .then(data => {
+            markers = data;
+            markers.forEach(function (markerData) {
+                var roundIcon = L.divIcon({
+                    className: 'round-marker',  // Use the class defined in CSS for custom style
+                    iconSize: [15, 15],  // Set the size of the round marker
 
-    });
+                });
 
-    L.marker([markerData.lat, markerData.lng], { icon: roundIcon })
-        //.bindPopup(markerData.title)
-        .bindPopup('<a href="https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg" target="_blank"><img src="https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg" alt="Map Tile" style="width: 200px; height: 200px; display: block;" /></a>')
-        .addTo(map);
-});
+                var bindpop_text = `<small>Pothole desc : ${markerData.pothole_desc}</small><br><small>Location: ${markerData.location}</small><br><small>Taluk - District: ${markerData.taluk} - ${markerData.district}</small>`
+
+                L.marker([markerData.latitude, markerData.longitude], { icon: roundIcon })
+                    //.bindPopup(markerData.title)
+                    .bindPopup(bindpop_text)
+                    .addTo(map);
+            });
+
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+
+
+
+    // Step 4: Iterate through the markers array and add markers to the map
+
+
+}
+
 var marker = null;
+function initialise_marker() {
+    marker = null;
 
+}
 
 map.on('click', function (e) {
     var lat = e.latlng.lat; // Latitude
     var lng = e.latlng.lng; // Longitude
     getDistrictTaluk(lng, lat)
 
-    // Update or create a marker at the clicked location
+
     if (marker) {
-        marker.setLatLng(e.latlng); // Move the marker to the new location
+        marker.setLatLng(e.latlng);
     } else {
-        marker = L.marker(e.latlng).addTo(map); // Add a new marker
+        marker = L.marker(e.latlng).addTo(map);
     }
 
     // Display the selected coordinates
     document.getElementById('lat').value = `${lat.toFixed(5)}`
     document.getElementById('lng').value = `${lng.toFixed(5)}`;
 });
-/*document.getElementById("submit_btn").addEventListener("click", async (event) => {
+document.getElementById("submit_btn").addEventListener("click", async (event) => {
     event.preventDefault();
     var formData = new FormData();
 
     // Get the values of the inputs
-    var loc_data = document.getElementById('loc_data').value;
-    var pothole_desc = document.getElementById('pothole_desc').value;
-    var image_upload = document.getElementById('image_upload').files[0];
+    var p_location = document.getElementById('p_location').value;
+    var p_desc = document.getElementById('p_desc').value;
+    var p_taluk = document.getElementById('p_taluk').value;
+    var p_district = document.getElementById('p_district').value;
     var lat = document.getElementById('lat').value;
     var lng = document.getElementById('lng').value;
 
-
-    // Append the form data to FormData object
-    formData.append('location', loc_data);
-    formData.append('pothole_desc', pothole_desc);
-    formData.append('image_upload', image_upload);
+    formData.append('location', p_location);
+    formData.append('pothole_desc', p_desc);
+    formData.append('p_taluk', p_taluk);
+    formData.append('p_district', p_district);
     formData.append('latitude', lat);
     formData.append('longitude', lng);
 
@@ -145,16 +168,24 @@ map.on('click', function (e) {
 
             body: formData,
         });
+        if (response.ok) {
+            document.getElementById("closeModalBtn").click();
+            clearData();
+            marker.remove();
+            getData();
+            initialise_marker();
+
+
+        }
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        document.getElementById('report_form').reset();
 
     } catch (error) {
         console.error("Error:", error);
     }
-});*/
+});
 
 
 //remove
@@ -167,7 +198,6 @@ function getLocation() {
 }
 
 function showPosition(position) {
-    alert("hi")
     alert(position.coords.latitude + "," + position.coords.longitude);
 }
 getLocation()
@@ -196,14 +226,14 @@ function getDistrictTaluk(lng, lat) {
             });
 
             if (foundDistrict) {
-                console.log(`The coordinate falls under: ${foundDistrict}`);
-                console.log(`The coordinate falls under: ${foundTaluk}`);
                 document.getElementById("p_taluk").value = foundTaluk;
                 document.getElementById("p_district").value = foundDistrict;
 
 
             } else {
                 console.log('No data found for the coordinate.');
+                document.getElementById("p_taluk").value = "";
+                document.getElementById("p_district").value = "";
             }
         })
         .catch(error => {
@@ -211,15 +241,4 @@ function getDistrictTaluk(lng, lat) {
         });
 
 }
-
-//modal start
-// Get the modal
-
-// Get the button that opens the modal
-//let openModalBtn = document.getElementById("add_btn");
-
-// Get the <span> element that closes the modal
-
-
-//modal end
 

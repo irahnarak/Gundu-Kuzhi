@@ -20,6 +20,9 @@ def create_tables():
 
 # Register the routes
 app.add_url_rule("/home", "home", routes.home)
+
+app.add_url_rule("/set_language", "set_language", routes.set_language)
+
 app.add_url_rule("/home_data", "home_data", routes.home_data)
 app.add_url_rule(
     "/validate_boundry", "validate_boundry", routes.validate_boundry, methods=["POST"]

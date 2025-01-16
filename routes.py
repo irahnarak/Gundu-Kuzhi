@@ -1,18 +1,46 @@
 # routes.py
 
-from flask import request, jsonify, render_template
+from flask import request, jsonify, render_template, redirect, url_for
 from models import db, Pothole
 import uuid
 import geopandas as gpd
 from shapely.geometry import Point
 import os
+import json
 
-# Route to test connection and view potholes
+
+def translate():
+    tr_json_file_path = "static/translate/translations.json"
+
+    abs_tr_json_file_path = os.path.join(os.path.dirname(__file__), tr_json_file_path)
+
+    with open(abs_tr_json_file_path, "r") as file:
+        translations = json.load(file)
+    return translations
 
 
 def home():
-    # data = home_data()
-    return render_template("home.html")
+    # Get the language from query parameters, default to 'en'
+    lang = request.args.get("lang", "en")
+
+    if lang:
+        # Assuming `translate()` is a function that provides translations.
+        translations_for_language = translate().get(lang, {})
+    else:
+        translations_for_language = translate().get("en", {})
+
+    return render_template(
+        "home.html",
+        translations=translations_for_language,
+    )
+
+
+def set_language():
+    # Get the language from the query parameter
+    language = request.args.get("lang", "en")
+
+    # Redirect to the main page with the new language query parameter
+    return redirect(url_for("home", lang=language))
 
 
 def home_data():
@@ -31,9 +59,9 @@ def validate_boundry():
     coordinate = data["coordinate"]
     # coordinate = data.get("coordinate")
     geojson_file_path = "static/geoloc/Taluk.geojson"
-    os.path.join(os.path.dirname(__file__), geojson_file_path)
+    abs_geojson_file_path = os.path.join(os.path.dirname(__file__), geojson_file_path)
 
-    gdf = gpd.read_file(geojson_file_path)
+    gdf = gpd.read_file(abs_geojson_file_path)
 
     # Create a Shapely Point object for the given coordinate (longitude, latitude)
     point = Point(coordinate)
@@ -48,20 +76,7 @@ def validate_boundry():
             return jsonify({"taluk": found_taluk, "district": found_district})
 
     # Return None if point is not inside any polygon
-    return None, None
-
-    # # Example usage
-    # geojson_file_path = (
-    #     "/static/geoloc/Taluk.geojson"  # Path to the GeoJSON file on the server
-    # )
-    # coordinate = (78.9629, 20.5937)  # Example coordinate (longitude, latitude)
-
-    # district, taluk = validate_point_in_boundary(coordinate, geojson_file_path)
-
-    # if district and taluk:
-    #     print(f"Found District: {district}, Taluk: {taluk}")
-    # else:
-    #     print("Point not found in any boundary.")
+    return jsonify(None)
 
 
 def test_connection():

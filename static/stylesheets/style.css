@@ -9,13 +9,22 @@ body {
     background-color: #262626;
     /* Take the full height of the viewport */
     color: aliceblue;
-
-
 }
-
 
 h1 {
     text-align: center;
+}
+
+#add_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    /* Adds space between the text and the SVG */
+}
+
+#add_btn span {
+    white-space: nowrap;
 }
 
 #map_cont {
@@ -34,9 +43,8 @@ h1 {
     /* Includes padding and border in the total width and height */
     background-color: #1e1e1e;
     /* For visibility */
-    width: 95%;
-    height: 80%;
-
+    width: 90%;
+    height: 70%;
 }
 
 #map {
@@ -46,9 +54,6 @@ h1 {
     flex-direction: row;
     align-items: center;
     border-radius: 8px;
-
-
-
 }
 
 .round-marker {
@@ -89,7 +94,7 @@ h1 {
 
 /* Modal content */
 #add-pothole-model {
-    width: 90%
+    width: 90%;
 }
 
 .modal-content {
@@ -128,15 +133,22 @@ input[type="text"] {
 
 button {
     padding: 10px 15px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #eed202;
+    color: black;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
+button:disabled {
+    background-color: #a89503;
+    color: #a9a9a9;
+    cursor: not-allowed;
+    color: black;
+}
+
 button:hover {
-    background-color: #45a049;
+    background-color: #a89503;
 }
 
 label.required::after {
@@ -144,6 +156,5 @@ label.required::after {
     color: red;
     font-weight: bold;
 }
-
 
 /*modal end*/

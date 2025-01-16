@@ -3,7 +3,9 @@
 from flask import request, jsonify, render_template
 from models import db, Pothole
 import uuid
-
+import geopandas as gpd
+from shapely.geometry import Point
+import os
 
 # Route to test connection and view potholes
 
@@ -22,8 +24,44 @@ def home_data():
     return jsonify(potholes_list)
 
 
-def new_pothole_form():
-    return render_template("new_pothole_form.html")
+# Function to validate if a point is within a boundary
+def validate_boundry():
+    # Read the GeoJSON file using GeoPandas
+    data = request.get_json()
+    coordinate = data["coordinate"]
+    # coordinate = data.get("coordinate")
+    geojson_file_path = "static/geoloc/Taluk.geojson"
+    os.path.join(os.path.dirname(__file__), geojson_file_path)
+
+    gdf = gpd.read_file(geojson_file_path)
+
+    # Create a Shapely Point object for the given coordinate (longitude, latitude)
+    point = Point(coordinate)
+
+    # Iterate through the features to check which one contains the point
+    for _, row in gdf.iterrows():
+        if row["geometry"].contains(point):
+            found_district = row["dist_name"]
+            found_taluk = row["taluk_name"]
+            print(found_district, found_taluk)
+            # Convert the set to a list before returning it
+            return jsonify({"taluk": found_taluk, "district": found_district})
+
+    # Return None if point is not inside any polygon
+    return None, None
+
+    # # Example usage
+    # geojson_file_path = (
+    #     "/static/geoloc/Taluk.geojson"  # Path to the GeoJSON file on the server
+    # )
+    # coordinate = (78.9629, 20.5937)  # Example coordinate (longitude, latitude)
+
+    # district, taluk = validate_point_in_boundary(coordinate, geojson_file_path)
+
+    # if district and taluk:
+    #     print(f"Found District: {district}, Taluk: {taluk}")
+    # else:
+    #     print("Point not found in any boundary.")
 
 
 def test_connection():

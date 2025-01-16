@@ -2,54 +2,55 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Kundu Kuzhi</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0"></script> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/style.css') }}" />
-
 </head>
 
 <body>
-    <h1>குண்டு குழி</h1>
-
-
+    <h1><sup>குண்டு</sup><sub>குழி</sub></h1>
     <div id="map_cont">
-
         <div id="map"></div>
-        <input type="hidden" id="lat">
-        <input type="hidden" id="lng">
+        <input type="hidden" id="lat" />
+        <input type="hidden" id="lng" />
 
-        <button type="button" id="add_btn" onclick="add_event()">Report a pothole</button>
+        <button type="button" id="add_btn" onclick="add_event()">
+            Report Pothole
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-exclamation-octagon-fill" viewBox="0 0 16 16">
+                <path
+                    d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+            </svg>
+        </button>
     </div>
     <div id="add-pothole-model" class="modal">
         <div class="modal-content">
             <span id="closeModalBtn" class="close-btn">&times;</span>
             <h2>Add - Pothole Info</h2>
-
-            <!-- Form with three input fields -->
             <form id="modalForm">
                 <label class="required" for="p_desc">Pothole Description</label>
-                <input type="text" id="p_desc" name="p_desc" required><br><br>
+                <input type="text" id="p_desc" name="p_desc" required /><br /><br />
 
                 <label class="required" for="p_location">Pothole Location</label>
-                <input type="text" id="p_location" name="p_location" placeholder="Address / Landmark" required><br><br>
+                <input type="text" id="p_location" name="p_location" placeholder="Address / Landmark"
+                    required /><br /><br />
 
                 <label for="p_taluk">Taluk</label>
-                <input type="text" id="p_taluk" name="p_taluk" disabled required><br><br>
+                <input type="text" id="p_taluk" name="p_taluk" disabled required /><br /><br />
                 <label for="p_district">District</label>
-                <input type="text" id="p_district" name="p_district" disabled required><br><br>
+                <input type="text" id="p_district" name="p_district" disabled required /><br /><br />
 
                 <button type="submit" id="submit_btn">Submit</button>
             </form>
         </div>
     </div>
     <script src="{{ url_for('static', filename='scripts/app.js') }}"></script>
-
 </body>
 
 </html>

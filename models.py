@@ -26,7 +26,7 @@ class Pothole(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "pothole_desc": self.location,
+            "pothole_desc": self.pothole_desc,
             "location": self.location,
             "taluk": self.taluk,
             "district": self.district,

@@ -21,7 +21,9 @@ def create_tables():
 # Register the routes
 app.add_url_rule("/home", "home", routes.home)
 app.add_url_rule("/home_data", "home_data", routes.home_data)
-app.add_url_rule("/new_pothole_form", "new_pothole_form", routes.new_pothole_form)
+app.add_url_rule(
+    "/validate_boundry", "validate_boundry", routes.validate_boundry, methods=["POST"]
+)
 app.add_url_rule("/test_connection", "test_connection", routes.test_connection)
 app.add_url_rule("/add_pothole", "p_save", routes.p_save, methods=["POST"])
 

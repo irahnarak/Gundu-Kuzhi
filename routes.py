@@ -1,6 +1,6 @@
 # routes.py
 
-from flask import request, jsonify, render_template, redirect, url_for
+from flask import request, jsonify, render_template, redirect, url_for, flash
 from models import db, Pothole
 import uuid
 import geopandas as gpd
@@ -9,8 +9,11 @@ import os
 import json
 
 
-def translate():
-    tr_json_file_path = "static/translate/translations.json"
+def translate(page_type):
+    if page_type == "home":
+        tr_json_file_path = "static/translate/translations.json"
+    elif page_type == "help":
+        tr_json_file_path = "static/translate/translations_help.json"
 
     abs_tr_json_file_path = os.path.join(os.path.dirname(__file__), tr_json_file_path)
 
@@ -22,16 +25,14 @@ def translate():
 def home():
     # Get the language from query parameters, default to 'en'
     lang = request.args.get("lang", "en")
-
     if lang:
         # Assuming `translate()` is a function that provides translations.
-        translations_for_language = translate().get(lang, {})
+        translations_for_language = translate("home").get(lang, {})
     else:
-        translations_for_language = translate().get("en", {})
+        translations_for_language = translate("home").get("en", {})
 
     return render_template(
-        "home.html",
-        translations=translations_for_language,
+        "home.html", translations=translations_for_language, lang=lang
     )
 
 
@@ -41,6 +42,14 @@ def set_language():
 
     # Redirect to the main page with the new language query parameter
     return redirect(url_for("home", lang=language))
+
+
+def help_set_language():
+    # Get the language from the query parameter
+    language = request.args.get("lang", "en")
+
+    # Redirect to the main page with the new language query parameter
+    return redirect(url_for("help", lang=language))
 
 
 def home_data():
@@ -77,6 +86,19 @@ def validate_boundry():
 
     # Return None if point is not inside any polygon
     return jsonify(None)
+
+
+def help():
+    lang = request.args.get("lang", "en")
+    if lang:
+        # Assuming `translate()` is a function that provides translations.
+        translations_for_language = translate("help").get(lang, {})
+    else:
+        translations_for_language = translate("help").get("en", {})
+
+    return render_template(
+        "help.html", translations_help=translations_for_language, lang=lang
+    )
 
 
 def test_connection():

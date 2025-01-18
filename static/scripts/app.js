@@ -1,11 +1,36 @@
 window.onload = function () {
     clearData();
     getData();
-    lang = new URLSearchParams(window.location.search).get('lang').slice(-2);
-    // Directly select and make the option selected
-    document.getElementById('languageSelect').value = lang;
-
 };
+
+
+// lang = new URLSearchParams(window.location.search).get('lang').slice(-2);
+document.getElementById('languageSelect').value = lang;
+clicked = false;
+cur_loc = false;
+
+function reportEnabler(position) {
+    if (position === "dis") {
+        document.getElementById("add_btn").disabled = true;
+    }
+    else if ((position === "en")) {
+        document.getElementById("add_btn").disabled = false;
+    }
+
+
+
+}
+function currentLocationEnabler(position) {
+
+    if (position === "dis") {
+        document.getElementById("current_location").disabled = true;
+    }
+    else if ((position === "en")) {
+        document.getElementById("current_location").disabled = false;
+    }
+
+
+}
 
 
 function changeLanguage() {
@@ -20,13 +45,13 @@ function clearData() {
     document.getElementById("p_desc").value = "";
     document.getElementById("p_location").value = "";
     document.getElementById("p_taluk").value = "";
-    document.getElementById("add_btn").disabled = false;
-    document.getElementById("current_location").disabled = false;
     document.getElementById("p_district").value = "";
+    currentLocationEnabler("en");
+    reportEnabler("dis")
 }
 
 function getData() {
-    var markers = null;
+    // var markers = null;
     fetch("/home_data")
         .then((response) => {
             // Check if the request was successful (status code 200-299)
@@ -43,7 +68,6 @@ function getData() {
                     className: "round-marker", // Use the class defined in CSS for custom style
                     iconSize: [15, 15], // Set the size of the round marker
                 });
-                console.log(markerData);
 
                 var bindpop_text = `<small>Pothole desc : ${markerData.pothole_desc}</small><br><small>Location: ${markerData.location}</small><br><small>Taluk - District: ${markerData.taluk} - ${markerData.district}</small>`;
 
@@ -62,6 +86,9 @@ function getData() {
     // Step 4: Iterate through the markers array and add markers to the map
 }
 
+function initialiseMarker() {
+    marker = null;
+}
 //map//
 
 var map = L.map("map").setView([12.9749, 80.1328], 8);
@@ -71,18 +98,23 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
 
-initialise_marker();
+initialiseMarker();
 
-function initialise_marker() {
-    marker = null;
-}
 
-map.on("click", function (e) {
+
+let isClickEnabled = true;
+map.on("click", handleMapClick);
+function handleMapClick(e) {
+    clicked = true;
+    cur_loc = false;
+
     var lat = e.latlng.lat; // Latitude
     var lng = e.latlng.lng; // Longitude
+    reportEnabler("dis");
+    currentLocationEnabler("dis")
+    document.getElementById("add_btn").innerText = translations["loading"];
+    disableMapClicks();
     getDistrictTaluk(lng, lat);
-    document.getElementById("add_btn").innerText = "wait..";
-    document.getElementById("add_btn").disabled = true;
 
     if (marker) {
         marker.setLatLng(e.latlng);
@@ -90,17 +122,37 @@ map.on("click", function (e) {
         marker = L.marker(e.latlng).addTo(map);
     }
 
+
     // Display the selected coordinates
     document.getElementById("lat").value = `${lat.toFixed(5)}`;
     document.getElementById("lng").value = `${lng.toFixed(5)}`;
-});
+
+}
+// Function to enable clicks
+function enableMapClicks() {
+    if (!isClickEnabled) {
+        map.on("click", handleMapClick);
+        isClickEnabled = true;
+    }
+}
+
+// Function to disable clicks
+function disableMapClicks() {
+    if (isClickEnabled) {
+        map.off("click", handleMapClick);
+        isClickEnabled = false;
+    }
+}
+
+// Attach the click event handler to the map
+
+
 //map-end//
 
 //get talukdistrict data//
 
 function getDistrictTaluk(lng, lat) {
     const coordinate = [lng, lat]; // Longitude, Latitude
-    //document.getElementById("add_btn").disabled = false;
 
     fetch("/validate_boundry", {
         method: "POST",
@@ -116,13 +168,19 @@ function getDistrictTaluk(lng, lat) {
                 console.log(`District: ${data.district}, Taluk: ${data.taluk}`);
                 document.getElementById("p_taluk").value = data.taluk;
                 document.getElementById("p_district").value = data.district;
-                document.getElementById("add_btn").disabled = false;
-                document.getElementById("current_location").disabled = false;
-
-                document.getElementById("add_btn").innerHTML = `Report Pothole 
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-octagon-fill" viewBox="0 0 16 16">
-    <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                document.getElementById("add_btn").innerHTML = `${translations["add_btn"]} 
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-octagon-fill" viewBox="0 0 16 16">
+        <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+    </svg>`;
+                document.getElementById("current_location").innerHTML = `${translations["current_location"]} 
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-crosshair2" viewBox="0 0 16 16">
+    <path d="M8 0a.5.5 0 0 1 .5.5v.518A7 7 0 0 1 14.982 7.5h.518a.5.5 0 0 1 0 1h-.518A7 7 0 0 1 8.5 14.982v.518a.5.5 0 0 1-1 0v-.518A7 7 0 0 1 1.018 8.5H.5a.5.5 0 0 1 0-1h.518A7 7 0 0 1 7.5 1.018V.5A.5.5 0 0 1 8 0m-.5 2.02A6 6 0 0 0 2.02 7.5h1.005A5 5 0 0 1 7.5 3.025zm1 1.005A5 5 0 0 1 12.975 7.5h1.005A6 6 0 0 0 8.5 2.02zM12.975 8.5A5 5 0 0 1 8.5 12.975v1.005a6 6 0 0 0 5.48-5.48zM7.5 12.975A5 5 0 0 1 3.025 8.5H2.02a6 6 0 0 0 5.48 5.48zM10 8a2 2 0 1 0-4 0 2 2 0 0 0 4 0"/>
 </svg>`;
+                enableMapClicks();
+                currentLocationEnabler("en");
+                reportEnabler("en")
+
+
             }
 
             else {
@@ -131,12 +189,17 @@ function getDistrictTaluk(lng, lat) {
         })
         .catch((error) => {
             if (error.message.includes("null")) {
-                alert("null");
+                document.getElementById("add_btn").innerHTML = `${translations["add_btn"]} 
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-crosshair2" viewBox="0 0 16 16">
+    <path d="M8 0a.5.5 0 0 1 .5.5v.518A7 7 0 0 1 14.982 7.5h.518a.5.5 0 0 1 0 1h-.518A7 7 0 0 1 8.5 14.982v.518a.5.5 0 0 1-1 0v-.518A7 7 0 0 1 1.018 8.5H.5a.5.5 0 0 1 0-1h.518A7 7 0 0 1 7.5 1.018V.5A.5.5 0 0 1 8 0m-.5 2.02A6 6 0 0 0 2.02 7.5h1.005A5 5 0 0 1 7.5 3.025zm1 1.005A5 5 0 0 1 12.975 7.5h1.005A6 6 0 0 0 8.5 2.02zM12.975 8.5A5 5 0 0 1 8.5 12.975v1.005a6 6 0 0 0 5.48-5.48zM7.5 12.975A5 5 0 0 1 3.025 8.5H2.02a6 6 0 0 0 5.48 5.48zM10 8a2 2 0 1 0-4 0 2 2 0 0 0 4 0"/>
+</svg>`;
+                alert(translations["boundry_alert"]);
+                reportEnabler("en");
+
                 clearData();
             }
             console.error("Error loading GeoJSON or fetching data:", error);
 
-            null
         });
 }
 
@@ -230,7 +293,7 @@ async function handleSubmit() {
             clearData();
             marker.remove();
             getData();
-            initialise_marker();
+            initialiseMarker();
         }
 
         if (!response.ok) {
@@ -244,28 +307,35 @@ async function handleSubmit() {
 
 //user coord//
 function getLocation() {
+    if (clicked == true) {
+        map.removeLayer(marker);
+        initialiseMarker();
+    }
+
+    clicked = false;
+    cur_loc = true;
+
     curr_loc_btn = document.getElementById("current_location");
     if (navigator.geolocation) {
-        curr_loc_btn.innerText = "wait..";
-        curr_loc_btn.disabled = true;
-        document.getElementById("add_btn").disabled = true;
 
+        curr_loc_btn.innerText = translations["loading"];
+        disableMapClicks();
+        currentLocationEnabler("dis");
+        reportEnabler("dis");
         navigator.geolocation.getCurrentPosition(showPosition);
+
+
+
     } else {
-        x.innerHTML = "Geolocation is not supported by this browser.";
+        alert("Geolocation is not supported by this browser.");
     }
 }
 
 function showPosition(position) {
-    curr_loc_btn = document.getElementById("current_location");
-    curr_loc_btn.innerHTML = `Current location
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-crosshair2" viewBox="0 0 16 16">
-    <path d="M8 0a.5.5 0 0 1 .5.5v.518A7 7 0 0 1 14.982 7.5h.518a.5.5 0 0 1 0 1h-.518A7 7 0 0 1 8.5 14.982v.518a.5.5 0 0 1-1 0v-.518A7 7 0 0 1 1.018 8.5H.5a.5.5 0 0 1 0-1h.518A7 7 0 0 1 7.5 1.018V.5A.5.5 0 0 1 8 0m-.5 2.02A6 6 0 0 0 2.02 7.5h1.005A5 5 0 0 1 7.5 3.025zm1 1.005A5 5 0 0 1 12.975 7.5h1.005A6 6 0 0 0 8.5 2.02zM12.975 8.5A5 5 0 0 1 8.5 12.975v1.005a6 6 0 0 0 5.48-5.48zM7.5 12.975A5 5 0 0 1 3.025 8.5H2.02a6 6 0 0 0 5.48 5.48zM10 8a2 2 0 1 0-4 0 2 2 0 0 0 4 0"/>
-</svg>`;
+
 
     lat = position.coords.latitude;
     lng = position.coords.longitude;
-    alert(lat + "," + lng);
     document.getElementById("lat").value = `${lat.toFixed(
         5
     )}`;

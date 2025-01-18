@@ -2,19 +2,25 @@
     "en": {
         "heading_1_1": "Gundu",
         "heading_1_2": "Kuzhi",
-        "add_btn": "Report pothole",
-        "current_location": "Current location",
+        "heading_2": "Add Pothole Info",
+        "add_btn": "Report Pothole",
+        "current_location": "Current Location",
         "loading": "Wait..",
-        "pothole_desc": "Pothole description",
+        "pothole_desc": "Pothole Description",
         "place": "Place",
         "taluk": "Taluk",
         "district": "District",
         "place_placeholder": "Address / Landmark",
-        "help": "Help"
+        "help": "Help",
+        "submit": "submit",
+        "mark_on_map": "Mark on Map",
+        "dev_alert": "This is a test site! feel free to provide your feedback!",
+        "boundry_alert": "Mark within Tamil Nadu."
     },
     "ta": {
         "heading_1_1": "குண்டு",
         "heading_1_2": "குழி",
+        "heading_2": "சாலை சேத விவரத்தை சேர்",
         "add_btn": "சேத சாலையை தெரிவி",
         "current_location": "தற்போதைய இடம்",
         "loading": "பொறு..",
@@ -23,6 +29,10 @@
         "taluk": "வட்டம்",
         "district": "மாவட்டம்",
         "place_placeholder": "முகவரி / அடையாளம்",
-        "help": "உதவி"
+        "help": "உதவி",
+        "submit": "சமர்ப்பி",
+        "mark_on_map": "வரைப்படத்தில் குறிக்கவும்",
+        "dev_alert": "இதுவொரு சோதனை தளம். உங்கள் பின்னூட்டங்கள் வரவேற்கப்படுகின்றது.",
+        "boundry_alert": "தமிழ்நாட்டினுள் குறிக்கவும்"
     }
 }

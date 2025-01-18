@@ -20,10 +20,12 @@ def create_tables():
 
 # Register the routes
 app.add_url_rule("/home", "home", routes.home)
-
 app.add_url_rule("/set_language", "set_language", routes.set_language)
+app.add_url_rule("/help_set_language", "help_set_language", routes.help_set_language)
 
 app.add_url_rule("/home_data", "home_data", routes.home_data)
+app.add_url_rule("/help", "help", routes.help)
+
 app.add_url_rule(
     "/validate_boundry", "validate_boundry", routes.validate_boundry, methods=["POST"]
 )
@@ -33,8 +35,3 @@ app.add_url_rule("/add_pothole", "p_save", routes.p_save, methods=["POST"])
 # Run the Flask app
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
-
-# todo
-# image upload
-
-# lets make it simpler

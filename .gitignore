@@ -6,7 +6,9 @@
 *.svg
 
 config.py
-todo.txt
+notes.txt
 image_location_extractor.py
 reverse_location.py
-kundukuzhivenv
+gundukuzhi_venv/
+__pycache__/
+*.pyc
